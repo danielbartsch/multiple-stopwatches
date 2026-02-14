@@ -54,7 +54,7 @@ const download = (fileName, data) => {
 
 exportAll.addEventListener('click',  ()=>{
 	const validStopwatches = stopwatchArray.filter(({name})=>name)
-	download(validStopwatches.map(({name})=>name).join(', ')+'.csv','name,zeit\n' + validStopwatches.map(sw=>[sw.name, +sw.prevTime].join(',')).join('\n'))
+	download(validStopwatches.map(({name})=>name).join(', ')+'.csv','name,zeit\n' + validStopwatches.map(sw=>[sw.name, sw.timeButton.textContent].join(',')).join('\n'))
 })
 addMacroBtn.addEventListener('click', e => {
 	if (addMacroDiv.classList.toggle('active')) {
@@ -189,7 +189,7 @@ function getParentStopwatch(child) {
 function clear(sw) {
 	let tb = sw.querySelector('.time button');
 	tb.classList.remove('going');
-	tb.textContent = '0.00';
+	tb.textContent = '00.00';
 }
 
 function removeStopwatch(toRemove) {
@@ -254,7 +254,7 @@ function clickTimeButtonEvent(e) {
 	let stopwatchObj = stopwatchArray.find(sw => e.target === sw.timeButton);
 	if (stopwatchObj) {
 		stopwatchObj.startTime = new Date();
-		stopwatchObj.prevTime = stopwatchObj.timeButton.textContent;
+		stopwatchObj.prevTime = stopwatchObj.secondsRunning ? stopwatchObj.secondsRunning:0;
 	}
 }
 
@@ -263,7 +263,12 @@ function updateStopwatches() {
 	let going = stopwatchArray.filter(sw => sw.timeButton && sw.timeButton.classList.contains('going'));
 	for (let i = 0; i < going.length; i++) { //update each stopwatch in array
 		let dur = (new Date() - going[i].startTime) / 1000;
-		going[i].timeButton.textContent = parseFloat(Math.round((+going[i].prevTime + dur) * 100) / 100).toFixed(2); //round to 2 decimal places
+		going[i].secondsRunning = parseFloat(Math.round((+going[i].prevTime + dur) * 100) / 100)
+
+		const minutesRunning = Math.floor(going[i].secondsRunning / 60)
+		const remainingSecondsRunning = going[i].secondsRunning % 60
+
+		going[i].timeButton.textContent = `${minutesRunning > 0?minutesRunning + ':':''}${remainingSecondsRunning<10?'0':''}${remainingSecondsRunning.toFixed(2)}`
 	}
 }
 
