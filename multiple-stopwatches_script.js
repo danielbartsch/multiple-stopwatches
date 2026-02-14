@@ -5,6 +5,7 @@ const template = document.getElementById('template');
 const addStopwatchBtn = document.getElementById('add-stopwatch');
 const removeAll = document.getElementById('remove-all');
 const clearAll = document.getElementById('clear-all');
+const exportAll = document.getElementById('export-all');
 const addMacroDiv = document.getElementById('add-macro-div');
 const addMacroBtn = document.getElementById('add-macro');
 const addMacroInput = document.getElementById('add-macro-input');
@@ -37,6 +38,24 @@ clearAll.addEventListener('click', () => stopwatchArray.forEach(sw => {
 		clear(sw.stopwatch);
 	}
 }));
+
+const download = (fileName, data) => {
+    const blob = new Blob([data], { type: 'text/csv' });
+
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+
+    a.href = url;
+    a.download = fileName;
+
+    a.click();
+}
+
+exportAll.addEventListener('click',  ()=>{
+	const validStopwatches = stopwatchArray.filter(({name})=>name)
+	download(validStopwatches.map(({name})=>name).join(', ')+'.csv','name,zeit\n' + validStopwatches.map(sw=>[sw.name, +sw.prevTime].join(',')).join('\n'))
+})
 addMacroBtn.addEventListener('click', e => {
 	if (addMacroDiv.classList.toggle('active')) {
 		clearAll.disabled = 'true';
@@ -51,7 +70,7 @@ addMacroBtn.addEventListener('click', e => {
 		addMacroInput.value = '';
 	}
 	stopwatchArray.forEach(sw => {
-		if (sw.stopwatch) {	
+		if (sw.stopwatch) {
 			let delButton = sw.stopwatch.querySelector('.remove');
 			toggleMacroMode(delButton);
 		}
@@ -86,7 +105,7 @@ function addStopwatch() {
 	newTimeButton.addEventListener('click', clickTimeButtonEvent);
 
 	let newName = newStopwatch.querySelector('.name');
-	newName.value = 'Stopwatch ' + (numIds);
+	newName.value = 'No. ' + (numIds);
 	newName.addEventListener('change', nameChangeEvent);
 	newName.addEventListener('focus', e => disableDrag(newStopwatch));
 	newName.addEventListener('focusout', e => enableDrag(newStopwatch));
